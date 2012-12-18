@@ -1,0 +1,143 @@
+#! /usr/bin/env ruby
+#! encoding: UTF-8
+
+require 'clamp'
+require 'RMagick'
+require 'ruby-progressbar'
+require 'colored'
+require 'fileutils'
+
+class Pdf2NookCommand < Clamp::Command
+
+  self.description = %{
+  ==========================================================
+     Tool to convert PDF files, to make them more readable
+     on Barnes & Nobel Simple Touch Nook reader and maybe
+     some other small e-ink readers with 6" screen…
+  ==========================================================
+  }
+
+  parameter "PATH", "PDF file path to convert it"
+
+  option ["-c", "--colors"], "COLORS", "output grayscale colors count", :attribute_name => :colors_count, :default => 16 do |c|
+    Integer(c)
+  end
+
+  option "--rotate", :flag, "set this flag if you set up your bottom buttons to flip pages forward"
+  option "--cleanup", :flag, "set this flag if you want to clear tmp files after converting"
+
+  def clear_tmp
+    if Dir.exists?('/tmp/pdf2nook/')
+      if Dir.entries('/tmp/pdf2nook/').length > 2
+        FileUtils.rm Dir.glob('/tmp/pdf2nook/*.png')
+        FileUtils.rm Dir.glob('/tmp/pdf2nook/*.pdf')
+      end
+    else
+      Dir.mkdir('/tmp/pdf2nook/');
+    end
+  end
+
+
+  def render_page(img, part)
+    part = (part == :top) ? Magick::NorthWestGravity : Magick::SouthEastGravity
+
+    img.resize_to_fill(img.columns, img.rows / 2, part)
+       .rotate(@degree)
+       .trim!(true)
+       .resize_to_fit(600,750)
+       .quantize(Integer(colors_count), Magick::GRAYColorspace)
+       .contrast(true)
+  end
+
+
+  def execute
+
+    clear_tmp
+
+    @degree = (rotate?) ? 90 : 270
+    filename = File.basename(path)
+
+    puts "Loading document…".yellow
+
+    pdf = Magick::ImageList.new
+    pdf.ping(path)
+
+    pages_count = pdf.scene
+    odd_pages_count = pages_count % 10
+
+    puts "#{pages_count+1} pages readed!".yellow
+
+    decade = 0
+
+    progress = ProgressBar.create(
+      :title       => "Rendering…",
+      :format      => '%t |%b>%i| %p%% done',
+      :starting_at => 0,
+      :total       => (pages_count / 10) + 1,
+      :length      => 60
+    )
+
+    (0..pages_count).step(10){|from|
+
+      new_pdf = Magick::ImageList.new()
+      decade += 1
+
+      progress.increment
+
+      if(from == pages_count - odd_pages_count)
+        to = from + odd_pages_count
+      else
+        to = from + 10
+      end
+
+      pdf = Magick::ImageList.new("#{path}[#{from}-#{to}]") do
+        self.density = "167.0x167.0"
+        self.background_color = "white"
+      end
+
+      pdf.each_with_index{|img, i|
+        img.opacity = 0
+        img.background_color = "white"
+
+        new_pdf << render_page(img, :top)
+        new_pdf << render_page(img, :bottom)
+      }
+
+      # replace spaces to avoid xargs problems
+      @tmp_filename = filename.gsub(/\s/,'_')
+
+      new_pdf.write("/tmp/pdf2nook/#{@tmp_filename}#{decade}.png") do
+        self.quality     = 100
+        self.density     = "167.0x167.0"
+        self.compression = Magick::NoCompression
+        self.colorspace  = Magick::GRAYColorspace
+        self.gravity     = Magick::NorthWestGravity
+      end
+
+      new_pdf = nil
+      pdf     = nil
+
+      GC.start
+    }
+
+    puts 'Compiling final document…'.yellow
+
+    render = Thread.new do
+      if(`convert --version`.include? 'OpenMP')
+        system("find /tmp/pdf2nook/ -name '*.png' | sort -V | xargs convert -limit thread 16 -limit memory 2GB -write '/tmp/pdf2nook/#{filename}'")
+      else
+        system("find /tmp/pdf2nook/ -name '*.png' | sort -V | xargs convert -limit memory 2GB -write '/tmp/pdf2nook/#{filename}'")
+      end
+    end
+
+    render.join
+
+    FileUtils.copy_file("/tmp/pdf2nook/#{filename}", "#{File.dirname(path)}/nook_#{filename}")
+
+    clear_tmp if cleanup?
+
+    puts "Done! Your book located in #{File.dirname(path)}/nook_#{filename}".green
+  end
+end
+
+Pdf2NookCommand.run
