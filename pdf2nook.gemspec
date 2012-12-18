@@ -13,6 +13,24 @@ Gem::Specification.new do |s|
   s.description = "Tool to convert PDF files, to make them more readable\n                       on Barnes & Nobel Simple Touch Nook reader and maybe\n                       some other small e-ink readers with 6\" screen\u{2026}"
   s.email = ["smileart21@gmail.com"]
   s.executables = ["pdf2nook"]
+  s.extra_rdoc_files = [
+    "LICENSE.txt",
+    "README.md"
+  ]
+  s.files = [
+    ".document",
+    "Gemfile",
+    "Gemfile.lock",
+    "LICENSE.txt",
+    "README.md",
+    "Rakefile",
+    "VERSION",
+    "bin/pdf2nook",
+    "lib/pdf2nook.rb",
+    "pdf2nook.gemspec",
+    "test/helper.rb",
+    "test/test_pdf2nook.rb"
+  ]
   s.homepage = "https://github.com/smileart/pdf2nook"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
