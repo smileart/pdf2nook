@@ -1,18 +1,18 @@
 source "http://rubygems.org"
 
 gem 'clamp'
-gem 'rmagick'
+gem 'rmagick', "~> 2.13.4"
 gem 'ruby-progressbar'
 gem 'colored'
 gem 'rake'
+gem 'os'
 
 group :development do
   gem "shoulda", ">= 0"
   gem "rdoc", "~> 3.12"
   gem "bundler"
   gem "awesome_print"
-  gem "jeweler", "~> 1.8.4"
-  gem "simplecov", ">= 0"
-  gem 'simplecov', :platforms => :mri_19
-  gem 'rcov'
+  gem "jeweler", "~> 2.0.1"
+  gem "letters"
+  gem "simplecov"
 end

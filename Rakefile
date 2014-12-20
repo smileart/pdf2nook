@@ -13,17 +13,16 @@ require 'rake'
 
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
-  # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
-  gem.name     = "pdf2nook"
-  gem.homepage = "https://github.com/smileart/pdf2nook"
-  gem.license  = "MIT"
+  # gem is a Gem::Specification... see http://guides.rubygems.org/specification-reference/ for more options
+  gem.name = "pdf2nook"
+  gem.homepage = "http://github.com/smileart/pdf2nook"
+  gem.license = "MIT"
+  gem.summary = %q{pdf2nook is a tool to convert PDF files, to make them more readable on e-books}
   gem.description = %q{Tool to convert PDF files, to make them more readable
                        on Barnes & Nobel Simple Touch Nook reader and maybe
                        some other small e-ink readers with 6" screen…}
-  gem.summary = %q{pdf2nook is a tool to convert PDF files, to make them more readable}
-  gem.email   = ["smileart21@gmail.com"]
-  gem.authors = ["Smile @rT"]
-
+  gem.email = "smileart21@gmail.com"
+  gem.authors = ["Serge Bedzhyk"]
   # dependencies defined in Gemfile
 end
 Jeweler::RubygemsDotOrgTasks.new
@@ -35,12 +34,10 @@ Rake::TestTask.new(:test) do |test|
   test.verbose = true
 end
 
-require 'rcov/rcovtask'
-Rcov::RcovTask.new do |test|
-  test.libs << 'test'
-  test.pattern = 'test/**/test_*.rb'
-  test.verbose = true
-  test.rcov_opts << '--exclude "gems/*"'
+desc "Code coverage detail"
+task :simplecov do
+  ENV['COVERAGE'] = "true"
+  Rake::Task['test'].execute
 end
 
 task :default => :test

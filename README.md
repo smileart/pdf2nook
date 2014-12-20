@@ -1,5 +1,6 @@
 PDF2Nook
 =========
+![Gem version](https://img.shields.io/badge/gem-0.2.0-green.svg "0.2.0")
 
 PDF2Nook is a Ruby-based CLI tool designed to convert regular PDF files and make them more readable on Barnes & Nobel Simple Touch Nook reader and maybe some other small 6-inch e-ink readers…
 
@@ -34,10 +35,11 @@ Dependencies
 
 Under the hood PDF2Nook uses a bunch of tools and libraries to work with PDF and to make all this kind of magic, so it has some dependencies:
 
-  - [**RMagick**](http://rmagick.rubyforge.org/) — Ruby ImageMagick® and GraphicsMagick binding, the heart of tool
+  - [**RMagick**](https://github.com/gemhome/rmagick/) — Ruby ImageMagick® and GraphicsMagick binding, the heart of tool
   - [**Clamp**](https://github.com/mdub/clamp) — easy to use and quite flexible Ruby CLI framework for command-line interface
   - [**Ruby-progressbar**](https://github.com/jfelchner/ruby-progressbar) — a customizable text progress bar Ruby library to indicate rendering
   - [**Rainbow**](https://github.com/sickill/rainbow) — a little but pretty useful Ruby tool-library for pretty printed CLI output
+  - [**sort(1)**](http://linux.die.net/man/1/sort) – GNU tool which sorts lines of text files (**on OS X should be installed with `brew install coreutils`**)
 
 Installation
 -----------
@@ -45,20 +47,24 @@ Installation
 To install PDF2Nook just run:
 `[sudo] gem install pdf2nook`
 
-In addition, if you had any problems with building native extension for RMagick, try installing the following stuff (tested on Ubuntu 12.04) and reattempt PDF2Nook installation after that:
+In addition, if you had any problems with building native extension for RMagick, try installing the following stuff (tested on Ubuntu) and reattempt PDF2Nook installation after that:
 
-    sudo apt-get install ruby1.9.3
+    sudo apt-get install ruby2.0
     sudo apt-get install librmagick-ruby libmagickcore-dev libmagickwand-dev
     sudo gem install rmagick
 
 or following on OS X:
 
-brew install imagemagick
+    brew install imagemagick
+    brew install ghostscript
+    brew install coreutils    # important!
+
+or using GUI: [ImageMagick installer for Mac OS X](http://cactuslab.com/imagemagick/)
 
 Usage
 -----------
 
-    pdf2nook.rb [OPTIONS] PATH
+    pdf2nook [OPTIONS] PATH
 
     Parameters:
         PATH                          PDF file path to convert it
@@ -122,4 +128,4 @@ Special thanks
 Copyright
 -----------
 
-Copyright (c) 2012 Smile @rT. See LICENSE.txt for further details.
+Copyright (c) 2014 Serge Bedzhyk. See LICENSE.txt for further details.

@@ -6,6 +6,7 @@ require 'RMagick'
 require 'ruby-progressbar'
 require 'colored'
 require 'fileutils'
+require 'os'
 
 class Pdf2NookCommand < Clamp::Command
 
@@ -37,7 +38,6 @@ class Pdf2NookCommand < Clamp::Command
     end
   end
 
-
   def render_page(img, part)
     part = (part == :top) ? Magick::NorthWestGravity : Magick::SouthEastGravity
 
@@ -49,10 +49,18 @@ class Pdf2NookCommand < Clamp::Command
        .contrast(true)
   end
 
-
   def execute
 
     clear_tmp
+
+    if OS.x?
+      begin
+        `gsort --version`
+      rescue Errno::ENOENT
+        puts 'It looks like you are on OS X and didn\'t install coreutils!'.red
+        puts 'Run '.white + 'brew install coreutils'.blue + ' please!'.white
+      end
+    end
 
     @degree = (rotate?) ? 90 : 270
     filename = File.basename(path)
@@ -122,11 +130,13 @@ class Pdf2NookCommand < Clamp::Command
 
     puts 'Compiling final document…'.yellow
 
+    sort_command = (OS.x?) ? 'gsort -V' : 'sort -V'
+
     render = Thread.new do
       if(`convert --version`.include? 'OpenMP')
-        system("find /tmp/pdf2nook/ -name '*.png' | sort -V | xargs convert -limit thread 16 -limit memory 2GB -write '/tmp/pdf2nook/#{filename}'")
+        system("find /tmp/pdf2nook/ -name '*.png' | #{sort_command} | xargs convert -limit thread 16 -limit memory 2GB -write '/tmp/pdf2nook/#{filename}'")
       else
-        system("find /tmp/pdf2nook/ -name '*.png' | sort -V | xargs convert -limit memory 2GB -write '/tmp/pdf2nook/#{filename}'")
+        system("find /tmp/pdf2nook/ -name '*.png' | #{sort_command} | xargs convert -limit memory 2GB -write '/tmp/pdf2nook/#{filename}'")
       end
     end
 
